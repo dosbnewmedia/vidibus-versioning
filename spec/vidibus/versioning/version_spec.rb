@@ -21,25 +21,25 @@ describe Vidibus::Versioning::Version do
     end
 
     it 'should pass with valid attributes' do
-      subject.should be_valid
+      expect(subject).to be_valid
     end
 
     it 'should fail without a number' do
       allow(subject).to receive(:number) {}
-      subject.should be_invalid
+      expect(subject).to be_invalid
     end
 
     it 'should fail without a unique version number' do
       another = subject.clone
       subject.save!
       another.number = 1
-      another.should be_invalid
+      expect(another).to be_invalid
     end
   end
 
   describe '#number' do
     it 'should be nil by default' do
-      subject.number.should be_nil
+      expect(subject.number).to be_nil
     end
 
     context 'with a versioned object' do
@@ -50,7 +50,7 @@ describe Vidibus::Versioning::Version do
       end
 
       it 'should be 1' do
-        subject.number.should eq(1)
+        expect(subject.number).to eq(1)
       end
 
       it 'should be 2 for next version of same object' do
@@ -58,7 +58,7 @@ describe Vidibus::Versioning::Version do
           :versioned => book,
           :versioned_attributes => book.attributes
         })
-        next_version.number.should eq(2)
+        expect(next_version.number).to eq(2)
       end
 
       it 'should be 1 for next version of different object' do
@@ -66,7 +66,7 @@ describe Vidibus::Versioning::Version do
           :versioned => another_book,
           :versioned_attributes => another_book.attributes
         })
-        next_version.number.should eq(1)
+        expect(next_version.number).to eq(1)
       end
     end
   end
@@ -80,17 +80,17 @@ describe Vidibus::Versioning::Version do
 
     it 'should be true if creation date is in the past' do
       subject.created_at = Time.now - 20000
-      subject.past?.should eq(true)
+      expect(subject.past?).to eq(true)
     end
 
     it 'should be false if creation date is in the future' do
       subject.created_at = Time.now + 20000
-      subject.past?.should eq(false)
+      expect(subject.past?).to eq(false)
     end
 
     it 'should be false if creation date has not been set' do
       subject.created_at = nil
-      subject.past?.should eq(false)
+      expect(subject.past?).to eq(false)
     end
   end
 
@@ -103,17 +103,17 @@ describe Vidibus::Versioning::Version do
 
     it 'should be true if creation date is in the future' do
       subject.created_at = Time.now + 20000
-      subject.future?.should eq(true)
+      expect(subject.future?).to eq(true)
     end
 
     it 'should be false if creation date is in the past' do
       subject.created_at = Time.now - 20000
-      subject.future?.should eq(false)
+      expect(subject.future?).to eq(false)
     end
 
     it 'should be false if creation date has not been set' do
       subject.created_at = nil
-      subject.future?.should eq(false)
+      expect(subject.future?).to eq(false)
     end
   end
 end

@@ -57,8 +57,8 @@ describe Vidibus::Versioning::Mongoid do
       expect(exp.to_a).to eq({'title' => 'Moby Dick'}.to_a)
 
       previous = book.version(:previous)
-      previous.title.should eq('Moby Dick')
-      previous.text.should be_nil
+      expect(previous.title).to eq('Moby Dick')
+      expect(previous.text).to be_nil
     end
 
     it 'should not set attributes that are not versioned' do
@@ -69,7 +69,7 @@ describe Vidibus::Versioning::Mongoid do
         :text => 'Call me Ishmael.',
         :published => true
       })
-      article.version(:previous).published.should eq(true)
+      expect(article.version(:previous).published).to eq(true)
     end
 
     context 'without arguments' do
@@ -82,16 +82,16 @@ describe Vidibus::Versioning::Mongoid do
       context 'if only one version is available' do
         it 'should return a copy of the record itself ' do
           version = book.version(1)
-          version.should eq(book)
-          version.object_id.should_not eq(book.object_id)
+          expect(version).to eq(book)
+          expect(version.object_id).not_to eq(book.object_id)
         end
       end
 
       context 'if several versions are available' do
         it 'should return version 1 of the record' do
           version = book_with_two_versions.version(1)
-          version.title.should eq('title 1')
-          version.version_number.should eq(1)
+          expect(version.title).to eq('title 1')
+          expect(version.version_number).to eq(1)
         end
       end
     end
@@ -113,9 +113,9 @@ describe Vidibus::Versioning::Mongoid do
       context 'if several versions are available' do
         it 'should return version 2 of the record' do
           version = book_with_two_versions.version(2)
-          version.title.should eq('title 2')
-          version.version_number.should eq(2)
-          version.should_not be_a_new_version
+          expect(version.title).to eq('title 2')
+          expect(version.version_number).to eq(2)
+          expect(version).not_to be_a_new_version
         end
       end
     end
@@ -123,38 +123,38 @@ describe Vidibus::Versioning::Mongoid do
     context 'with argument :new' do
       context 'if only one version is available' do
         it 'should return a new version of the record' do
-          book.version(:new).should be_a_new_version
+          expect(book.version(:new)).to be_a_new_version
         end
 
         it 'should apply the object\'s current attributes' do
-          book.version(:new).title.should eq('title 1')
+          expect(book.version(:new).title).to eq('title 1')
         end
 
         it 'should set version number 2' do
-          book.version(:new).version_number.should eq(2)
+          expect(book.version(:new).version_number).to eq(2)
         end
 
         it 'should set version update time' do
           now = stub_time('2011-07-14 14:00')
-          book.version(:new).version_updated_at.should eq(now)
+          expect(book.version(:new).version_updated_at).to eq(now)
         end
 
         it 'should set version number 2 even if argument is given as string' do
-          book.version('new').version_number.should eq(2)
+          expect(book.version('new').version_number).to eq(2)
         end
 
         it 'should not apply a new version until the current one is persisted' do
-          book.version(:new).version_number.should eq(2)
-          book.version(:new).version_number.should eq(2)
+          expect(book.version(:new).version_number).to eq(2)
+          expect(book.version(:new).version_number).to eq(2)
           book.version(:new).save
-          book.version(:new).version_number.should eq(2)
+          expect(book.version(:new).version_number).to eq(2)
         end
 
         it 'should not apply a new version if the current one is persisted' do
-          book.version(:new).version_number.should eq(2)
-          book.version(:new).version_number.should eq(2)
+          expect(book.version(:new).version_number).to eq(2)
+          expect(book.version(:new).version_number).to eq(2)
           book.version(:new).update_attributes(title: 'new title')
-          book.version(:new).version_number.should eq(3)
+          expect(book.version(:new).version_number).to eq(3)
         end
       end
 
@@ -164,15 +164,15 @@ describe Vidibus::Versioning::Mongoid do
         end
 
         it 'should return a new version of the record' do
-          book_with_two_versions.version(:new).should be_a_new_version
+          expect(book_with_two_versions.version(:new)).to be_a_new_version
         end
 
         it 'should apply the object\'s current attributes' do
-          book_with_two_versions.version(:new).title.should eq('title 1')
+          expect(book_with_two_versions.version(:new).title).to eq('title 1')
         end
 
         it 'should set version number 3' do
-          book_with_two_versions.version(:new).version_number.should eq(3)
+          expect(book_with_two_versions.version(:new).version_number).to eq(3)
         end
       end
     end
@@ -180,19 +180,19 @@ describe Vidibus::Versioning::Mongoid do
     context 'with argument :next' do
       context 'if only one version is available' do
         it 'should return a new version of the record' do
-          book.version(:next).should be_a_new_version
+          expect(book.version(:next)).to be_a_new_version
         end
 
         it 'should apply the object\'s current attributes' do
-          book.version(:next).title.should eq('title 1')
+          expect(book.version(:next).title).to eq('title 1')
         end
 
         it 'should set version number 2' do
-          book.version(:next).version_number.should eq(2)
+          expect(book.version(:next).version_number).to eq(2)
         end
 
         it 'should set version number 2 even if argument is given as string' do
-          book.version('next').version_number.should eq(2)
+          expect(book.version('next').version_number).to eq(2)
         end
       end
 
@@ -200,36 +200,36 @@ describe Vidibus::Versioning::Mongoid do
         it 'should return version 2 of the record' do
           book_with_two_versions.migrate!(1)
           version = book_with_two_versions.version(:next)
-          version.should_not be_a_new_version
-          version.title.should eq('title 2')
-          version.version_number.should eq(2)
+          expect(version).not_to be_a_new_version
+          expect(version.title).to eq('title 2')
+          expect(version.version_number).to eq(2)
         end
       end
     end
 
     context 'with argument :previous' do
       it 'should return version 1, if current version is 2' do
-        book_with_two_versions.version(:previous).version_number.should eq(1)
+        expect(book_with_two_versions.version(:previous).version_number).to eq(1)
       end
 
       it 'should return version 2, if current version is 3 and argument is given as string' do
-        book_with_three_versions.version('previous').
-          version_number.should eq(2)
+        expect(book_with_three_versions.version('previous').
+          version_number).to eq(2)
       end
 
       it 'should return a copy of self, if current version is 1' do
         book_with_two_versions.migrate!(1)
-        book.version(:previous).version_number.should eq(1)
+        expect(book.version(:previous).version_number).to eq(1)
       end
     end
 
     context 'with arguments :new, :title => "new 2"' do
       it 'should initialize a new version with given attributes' do
         version = book.version(:new, :title => 'new')
-        version.version_number.should eq(2)
-        version.title.should eq('new')
-        version.text.should eq('text 1')
-        version.should be_a_new_version
+        expect(version.version_number).to eq(2)
+        expect(version.title).to eq('new')
+        expect(version.text).to eq('text 1')
+        expect(version).to be_a_new_version
       end
     end
 
@@ -238,9 +238,9 @@ describe Vidibus::Versioning::Mongoid do
         it 'should set given attributes on version 2' do
           book_with_two_versions.migrate!(1)
           version = book_with_two_versions.version(2, :title => 'new')
-          version.version_number.should eq(2)
-          version.title.should eq('new')
-          version.title_changed?.should eq(true)
+          expect(version.version_number).to eq(2)
+          expect(version.title).to eq('new')
+          expect(version.title_changed?).to eq(true)
         end
       end
 
@@ -270,10 +270,10 @@ describe Vidibus::Versioning::Mongoid do
     context 'with arguments' do
       it 'should change the current object to a new version with given attributes' do
         book.version!(:next, :title => 'new')
-        book.version_number.should eq(2)
-        book.title.should eq('new')
-        book.text.should eq('text 1')
-        book.should be_a_new_version
+        expect(book.version_number).to eq(2)
+        expect(book.title).to eq('new')
+        expect(book.text).to eq('text 1')
+        expect(book).to be_a_new_version
       end
     end
   end
@@ -294,13 +294,13 @@ describe Vidibus::Versioning::Mongoid do
     context 'with a valid version number' do
       context 'on an object with versions' do
         it 'should return true' do
-          book_with_two_versions.version?(2).should eq(true)
+          expect(book_with_two_versions.version?(2)).to eq(true)
         end
       end
 
       context 'on an object without versions' do
         it 'should return true' do
-          book.version?(1).should eq(true)
+          expect(book.version?(1)).to eq(true)
         end
       end
     end
@@ -308,13 +308,13 @@ describe Vidibus::Versioning::Mongoid do
     context 'with an invalid version number' do
       context 'on an object with versions' do
         it 'should return false' do
-          book_with_two_versions.version?(3).should eq(false)
+          expect(book_with_two_versions.version?(3)).to eq(false)
         end
       end
 
       context 'on an object without versions' do
         it 'should return false' do
-          book.version?(2).should eq(false)
+          expect(book.version?(2)).to eq(false)
         end
       end
     end
@@ -331,9 +331,9 @@ describe Vidibus::Versioning::Mongoid do
       book_with_two_versions.title = 'something new'
       book_with_two_versions.migrate!(1)
       book_with_two_versions.reload
-      book_with_two_versions.title.should eq('title 1')
-      book_with_two_versions.versions[1].
-        versioned_attributes['title'].should eq('title 2')
+      expect(book_with_two_versions.title).to eq('title 1')
+      expect(book_with_two_versions.versions[1].
+        versioned_attributes['title']).to eq('title 2')
     end
 
     context 'without arguments' do
@@ -341,19 +341,19 @@ describe Vidibus::Versioning::Mongoid do
         version = book_with_two_versions.version(1)
         version.migrate!
         version.reload
-        version.version_number.should eq(1)
-        version.title.should eq('title 1')
+        expect(version.version_number).to eq(1)
+        expect(version.title).to eq('title 1')
       end
 
       it 'should store the current object\'s attributes as new version' do
         versioned_attributes = book_with_two_versions.versioned_attributes.dup
         book_with_two_versions.version(1).migrate!
-        book_with_two_versions.version(2).
-          versioned_attributes.should eq(versioned_attributes)
+        expect(book_with_two_versions.version(2).
+          versioned_attributes).to eq(versioned_attributes)
       end
 
       it 'should return nil on success' do
-        book_with_two_versions.version(1).migrate!.should be_nil
+        expect(book_with_two_versions.version(1).migrate!).to be_nil
       end
 
       it 'should raise a MigrationError unless a version has been loaded or given' do
@@ -369,9 +369,9 @@ describe Vidibus::Versioning::Mongoid do
       it 'should apply the version given' do
         book_with_two_versions.migrate!(1)
         book_with_two_versions.reload
-        book_with_two_versions.version_number.should eq(1)
-        book_with_two_versions.versioned_attributes.
-          should eq(book_with_two_versions.versions.first.versioned_attributes)
+        expect(book_with_two_versions.version_number).to eq(1)
+        expect(book_with_two_versions.versioned_attributes).
+          to eq(book_with_two_versions.versions.first.versioned_attributes)
       end
 
       it 'should raise a MigrationError if the version number is the current one' do
@@ -383,10 +383,10 @@ describe Vidibus::Versioning::Mongoid do
       it 'should store the attributes as new version' do
         book_with_two_versions.migrate!(1)
         book_with_two_versions.reload
-        book_with_two_versions.versions.count.should eq(2)
-        book_with_two_versions.versions[1].
-          versioned_attributes['title'].should eq('title 2')
-        book_with_two_versions.versions[1].number.should eq(2)
+        expect(book_with_two_versions.versions.count).to eq(2)
+        expect(book_with_two_versions.versions[1].
+          versioned_attributes['title']).to eq('title 2')
+        expect(book_with_two_versions.versions[1].number).to eq(2)
       end
     end
 
@@ -403,17 +403,17 @@ describe Vidibus::Versioning::Mongoid do
       end
 
       it 'should not create a new version object' do
-        book_with_two_versions.versions.count.should eq(2)
+        expect(book_with_two_versions.versions.count).to eq(2)
         book_with_two_versions.migrate!(:next)
-        book_with_two_versions.reload.versions.count.should eq(2)
+        expect(book_with_two_versions.reload.versions.count).to eq(2)
       end
 
       it 'should ensure that each version\'s creation time reflects the time of update' do
         book_with_two_versions.migrate!(:next)
-        book_with_two_versions.versions[0].
-          created_at.should eq(Time.parse('2011-07-01 01:00 UTC').localtime)
-        book_with_two_versions.versions[1].
-          created_at.should eq(Time.parse('2011-07-01 02:00 UTC').localtime)
+        expect(book_with_two_versions.versions[0].
+          created_at).to eq(Time.parse('2011-07-01 01:00 UTC').localtime)
+        expect(book_with_two_versions.versions[1].
+          created_at).to eq(Time.parse('2011-07-01 02:00 UTC').localtime)
       end
     end
 
@@ -432,20 +432,20 @@ describe Vidibus::Versioning::Mongoid do
       end
 
       it 'should create a new version object of the old version' do
-        book.versions.count.should eq(1)
+        expect(book.versions.count).to eq(1)
         book.migrate!(:next)
-        book.versions.count.should eq(2)
-        book.versions.last.number.should eq(1)
-        book.versions.last.versioned_attributes['title'].should eq('title 1')
+        expect(book.versions.count).to eq(2)
+        expect(book.versions.last.number).to eq(1)
+        expect(book.versions.last.versioned_attributes['title']).to eq('title 1')
       end
 
       it 'should ensure that each version\'s creation time reflects the time of update' do
         book.migrate!(:next)
         book.reload
-        book.versions[0].created_at.
-          should eq(Time.parse('2011-07-01 03:00 UTC').localtime)
-        book.versions[1].created_at.
-          should eq(Time.parse('2011-07-01 01:00 UTC').localtime)
+        expect(book.versions[0].created_at).
+          to eq(Time.parse('2011-07-01 03:00 UTC').localtime)
+        expect(book.versions[1].created_at).
+          to eq(Time.parse('2011-07-01 01:00 UTC').localtime)
       end
     end
   end
@@ -472,13 +472,13 @@ describe Vidibus::Versioning::Mongoid do
 
     it 'should return the version at a given time string' do
       version = book_with_three_versions.version_at('2014-11-07 11:00')
-      version.version_number.should eq(2)
+      expect(version.version_number).to eq(2)
     end
 
     it 'should return the version at a given time object' do
       time = Time.parse('2014-11-07 10:59')
       version = book_with_three_versions.version_at(time)
-      version.version_number.should eq(1)
+      expect(version.version_number).to eq(1)
     end
 
     it 'should raise an error if no version exists at given time' do
@@ -489,7 +489,7 @@ describe Vidibus::Versioning::Mongoid do
 
     it 'should return the current version if time matches' do
       version = book_with_three_versions.version_at('2014-11-07 12:00')
-      version.version_number.should eq(3)
+      expect(version.version_number).to eq(3)
     end
 
     it 'should return a future version' do
@@ -498,7 +498,7 @@ describe Vidibus::Versioning::Mongoid do
         v.save
       end
       version = book_with_three_versions.version_at('2014-11-08 11:00')
-      version.version_number.should eq(4)
+      expect(version.version_number).to eq(4)
     end
 
     it 'should return the last version matching given time' do
@@ -507,7 +507,7 @@ describe Vidibus::Versioning::Mongoid do
         v.save
       end
       version = book_with_three_versions.version_at('2014-11-07 11:00')
-      version.version_number.should eq(4)
+      expect(version.version_number).to eq(4)
     end
   end
 
@@ -529,35 +529,35 @@ describe Vidibus::Versioning::Mongoid do
 
   describe '#version_object' do
     it 'should be nil by default' do
-      book.version_object.should be_nil
+      expect(book.version_object).to be_nil
     end
 
     it 'should return the currently loaded version object' do
-      book_with_two_versions.version(1).version_object.
-        should eq(book_with_two_versions.versions.first)
+      expect(book_with_two_versions.version(1).version_object).
+        to eq(book_with_two_versions.versions.first)
     end
 
     it 'should be nil for the current version' do
-      book_with_two_versions.version(2).version_object.should be_nil
+      expect(book_with_two_versions.version(2).version_object).to be_nil
     end
 
     it 'should return a new version object for a new version' do
-      book_with_two_versions.version(:new).version_object.
-        should be_a_new_record
+      expect(book_with_two_versions.version(:new).version_object).
+        to be_a_new_record
     end
   end
 
   describe '#original_version_number' do
     it 'should equal version number by default' do
-      book.original_version_number.should eq(1)
+      expect(book.original_version_number).to eq(1)
     end
 
     it 'should return the version number of the original object' do
-      book_with_two_versions.version(1).original_version_number.should eq(2)
+      expect(book_with_two_versions.version(1).original_version_number).to eq(2)
     end
 
     it 'should return the version number of the original object on a new version' do
-      book_with_two_versions.version(:new).original_version_number.should eq(2)
+      expect(book_with_two_versions.version(:new).original_version_number).to eq(2)
     end
   end
 
@@ -566,7 +566,7 @@ describe Vidibus::Versioning::Mongoid do
       version = book_with_two_versions.version(1)
       version.title = 'invalid'
       version.reload_version
-      version.title.should_not eq('invalid')
+      expect(version.title).not_to eq('invalid')
     end
 
     it 'should apply the version attributes' do
@@ -583,15 +583,15 @@ describe Vidibus::Versioning::Mongoid do
 
   describe '#new_version?' do
     it 'should return true if version is a new one' do
-      book.version(:new).new_version?.should eq(true)
+      expect(book.version(:new).new_version?).to eq(true)
     end
 
     it 'should return nil if version is the current one' do
-      book.version(1).new_version?.should eq(false)
+      expect(book.version(1).new_version?).to eq(false)
     end
 
     it 'should return false if version already exists' do
-      book_with_two_versions.version(1).new_version?.should eq(false)
+      expect(book_with_two_versions.version(1).new_version?).to eq(false)
     end
   end
 
@@ -610,14 +610,14 @@ describe Vidibus::Versioning::Mongoid do
     end
 
     it 'should contain the time the record was edited' do
-      book_with_two_versions.
-        updated_at.should eq(Time.parse('2011-07-01 00:02 UTC'))
+      expect(book_with_two_versions.
+        updated_at).to eq(Time.parse('2011-07-01 00:02 UTC'))
     end
 
     context 'with a loaded version' do
       it 'should return the time the version was created at' do
-        book_with_two_versions.version(1).
-          updated_at.should eq(Time.parse('2011-07-01 00:01 UTC'))
+        expect(book_with_two_versions.version(1).
+          updated_at).to eq(Time.parse('2011-07-01 00:01 UTC'))
       end
     end
   end
@@ -627,14 +627,14 @@ describe Vidibus::Versioning::Mongoid do
       it 'should persist an existing versioned record' do
         comment.text = 'new text'
         comment.save
-        comment.reload.text.should eq('new text')
+        expect(comment.reload.text).to eq('new text')
       end
 
       it 'should persist a new versioned record' do
         comment = Comment.new
         comment.text = 'new text'
         comment.save
-        comment.reload.text.should eq('new text')
+        expect(comment.reload.text).to eq('new text')
       end
     end
 
@@ -643,34 +643,34 @@ describe Vidibus::Versioning::Mongoid do
 
       context 'without changes' do
         it 'should return true if saving succeeds' do
-          version.save.should eq(true)
+          expect(version.save).to eq(true)
         end
       end
 
       context 'and changes to versioned attributes' do
         it 'should return false if record is invalid' do
           version.text = nil
-          version.save.should eq(false)
+          expect(version.save).to eq(false)
         end
 
         it 'should not create a version object if the record is invalid' do
           version.text = nil
           version.save
-          version.reload.versions.count.should eq(0)
+          expect(version.reload.versions.count).to eq(0)
         end
 
         it 'should update the versioned object' do
           version.text = 'new text'
           version.save
-          version.reload.text.should eq('new text')
+          expect(version.reload.text).to eq('new text')
         end
 
         it 'should create a new version object' do
           version.text = 'new text'
           version.save!
-          version.versions.count.should eq(1)
-          version.versions.first.
-            versioned_attributes['text'].should eq('text 1')
+          expect(version.versions.count).to eq(1)
+          expect(version.versions.first.
+            versioned_attributes['text']).to eq('text 1')
         end
       end
 
@@ -678,13 +678,13 @@ describe Vidibus::Versioning::Mongoid do
         it 'should update the versioned object' do
           version.author = 'Philip'
           version.save
-          version.reload.author.should eq('Philip')
+          expect(version.reload.author).to eq('Philip')
         end
 
         it 'should not create a new version object' do
           version.author = 'Philip'
           version.save!
-          version.reload.versions.count.should eq(0)
+          expect(version.reload.versions.count).to eq(0)
         end
       end
     end
@@ -695,31 +695,31 @@ describe Vidibus::Versioning::Mongoid do
       context 'and changes to versioned attributes' do
         it 'should return false if record is invalid' do
           version.text = nil
-          version.save.should eq(false)
+          expect(version.save).to eq(false)
         end
 
         it 'should not update the version object if the record is invalid' do
           version.text = nil
           version.save
-          version.reload.versions.first.
-            versioned_attributes['text'].should_not be_nil
+          expect(version.reload.versions.first.
+            versioned_attributes['text']).not_to be_nil
         end
 
         it 'should return true if saving succeeds' do
-          version.save.should eq(true)
+          expect(version.save).to eq(true)
         end
 
         it 'should not update the versioned object' do
           version.text = 'new text'
           version.save
-          version.reload.text.should_not eq('new text')
+          expect(version.reload.text).not_to eq('new text')
         end
 
         it 'should update the version object' do
           version.text = 'new text'
           version.save
-          version.reload.versions.first.
-            versioned_attributes['text'].should eq('new text')
+          expect(version.reload.versions.first.
+            versioned_attributes['text']).to eq('new text')
         end
       end
 
@@ -727,13 +727,13 @@ describe Vidibus::Versioning::Mongoid do
         it 'should update the versioned object' do
           version.author = 'Philip'
           version.save
-          version.reload.author.should eq('Philip')
+          expect(version.reload.author).to eq('Philip')
         end
 
         it 'should not create a new version object' do
           version.author = 'Philip'
           version.save!
-          version.reload.versions.count.should eq(1)
+          expect(version.reload.versions.count).to eq(1)
         end
       end
     end
@@ -744,25 +744,25 @@ describe Vidibus::Versioning::Mongoid do
       context 'and changes to versioned attributes' do
         it 'should return false if record is invalid' do
           version.text = nil
-          version.save.should eq(false)
+          expect(version.save).to eq(false)
         end
 
         it 'should not create a version object if the record is invalid' do
           version.text = nil
           version.save
-          version.reload.versions.count.should eq(0)
+          expect(version.reload.versions.count).to eq(0)
         end
 
         it 'should return true if saving succeeds' do
-          version.save.should eq(true)
+          expect(version.save).to eq(true)
         end
 
         it 'should create a new version object' do
           version.text = 'new text'
           version.save!
-          version.versions.count.should eq(1)
-          version.versions.first.
-            versioned_attributes['text'].should eq('new text')
+          expect(version.versions.count).to eq(1)
+          expect(version.versions.first.
+            versioned_attributes['text']).to eq('new text')
         end
       end
 
@@ -770,13 +770,13 @@ describe Vidibus::Versioning::Mongoid do
         it 'should update the versioned object' do
           version.author = 'Philip'
           version.save
-          version.reload.author.should eq('Philip')
+          expect(version.reload.author).to eq('Philip')
         end
 
         it 'should not create a new version object' do
           version.author = 'Philip'
           version.save!
-          version.reload.versions.count.should eq(0)
+          expect(version.reload.versions.count).to eq(0)
         end
       end
     end
@@ -808,7 +808,7 @@ describe Vidibus::Versioning::Mongoid do
 
       it 'should remove all versions of the record' do
         book_with_two_versions.delete
-        Vidibus::Versioning::Version.all.count.should eq(0)
+        expect(Vidibus::Versioning::Version.all.count).to eq(0)
       end
     end
 
@@ -819,7 +819,7 @@ describe Vidibus::Versioning::Mongoid do
 
       it 'should delete the version' do
         version.delete
-        version.reload.versions.count.should eq(1)
+        expect(version.reload.versions.count).to eq(1)
       end
 
       it 'should keep the versioned object if deleting fails' do
@@ -839,7 +839,7 @@ describe Vidibus::Versioning::Mongoid do
 
       it 'should remove all versions of the record' do
         book_with_two_versions.destroy
-        Vidibus::Versioning::Version.all.count.should eq(0)
+        expect(Vidibus::Versioning::Version.all.count).to eq(0)
       end
     end
 
@@ -850,7 +850,7 @@ describe Vidibus::Versioning::Mongoid do
 
       it 'should destroy the version' do
         version.destroy
-        version.reload.versions.count.should eq(1)
+        expect(version.reload.versions.count).to eq(1)
       end
 
       it 'should keep the versioned object if deleting fails' do
@@ -865,7 +865,7 @@ describe Vidibus::Versioning::Mongoid do
     context 'without versioned attributes defined' do
       it 'should return all attributes except the unversioned ones' do
         expected = book.attributes.except(Book.unversioned_attributes)
-        book.versioned_attributes.should eq(expected)
+        expect(book.versioned_attributes).to eq(expected)
       end
     end
 
@@ -877,7 +877,7 @@ describe Vidibus::Versioning::Mongoid do
       it 'should return the versioned attributes only' do
         Book.versioned_attributes = ['title']
         book = Book.new(book_attributes)
-        book.versioned_attributes.should eq({'title' => 'title 1'})
+        expect(book.versioned_attributes).to eq({'title' => 'title 1'})
       end
     end
   end
@@ -891,36 +891,36 @@ describe Vidibus::Versioning::Mongoid do
     end
 
     it 'should return the time of the last update by default' do
-      article.version_updated_at.should eq(article.updated_at)
+      expect(article.version_updated_at).to eq(article.updated_at)
     end
 
     it 'should return Time.now on a new record' do
       stub_time('2011-07-14 14:00')
-      Article.new.version_updated_at.should eq(Time.now)
+      expect(Article.new.version_updated_at).to eq(Time.now)
     end
 
     it 'should return the time on which versioned attributes were updated' do
       article.update_attributes(:title => 'Something new')
-      article.reload.
-        version_updated_at.should eq(Time.parse('2011-07-14 14:00'))
+      expect(article.reload.
+        version_updated_at).to eq(Time.parse('2011-07-14 14:00'))
     end
 
     it 'should not change unless versioned attributes get changed' do
       article.update_attributes(:title => 'Something new')
       stub_time('2011-07-14 15:00')
       article.update_attributes(:published => true)
-      article.reload.version_updated_at.should eq(Time.parse('2011-07-14 14:00'))
+      expect(article.reload.version_updated_at).to eq(Time.parse('2011-07-14 14:00'))
     end
   end
 
   describe '.versioned_attributes' do
     it 'should be an empty array by default' do
-      Book.versioned_attributes.should eq([])
+      expect(Book.versioned_attributes).to eq([])
     end
 
     it 'should reflect fields defined by .versioned' do
       Book.versioned(:title)
-      Book.versioned_attributes.should eq(['title'])
+      expect(Book.versioned_attributes).to eq(['title'])
     end
 
     after do
@@ -930,12 +930,12 @@ describe Vidibus::Versioning::Mongoid do
 
   describe '.versioning_options' do
     it 'should be an empty hash by default' do
-      Book.versioning_options.should eq({})
+      expect(Book.versioning_options).to eq({})
     end
 
     it 'should reflect options defined by .versioned' do
       Book.versioned(:editing_time => 300)
-      Book.versioning_options.should eq({:editing_time => 300})
+      expect(Book.versioning_options).to eq({:editing_time => 300})
     end
 
     after do
@@ -946,7 +946,7 @@ describe Vidibus::Versioning::Mongoid do
   describe '.unversioned_attributes' do
     it 'should return _id, _type, uuid, updated_at, created_at, version_number, and version_updated_at' do
       expected = %w[_id _type uuid updated_at created_at version_number version_updated_at]
-      Book.unversioned_attributes.should eq(expected)
+      expect(Book.unversioned_attributes).to eq(expected)
     end
   end
 

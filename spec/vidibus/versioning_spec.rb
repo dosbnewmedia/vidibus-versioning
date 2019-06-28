@@ -14,11 +14,11 @@ describe Vidibus::Versioning do
     end
 
     it 'should not create a version' do
-      book.versions.count.should eq(0)
+      expect(book.versions.count).to eq(0)
     end
 
     it 'should set version number 1' do
-      book.version_number.should eq(1)
+      expect(book.version_number).to eq(1)
     end
   end
 
@@ -63,26 +63,26 @@ describe Vidibus::Versioning do
       end
 
       it 'should create the first version object' do
-        book.versions.count.should eq(1)
+        expect(book.versions.count).to eq(1)
       end
 
       it 'should store the previous attributes as versioned ones' do
         expected = {'title' => 'title 1', 'text' => 'text 1'}
-        book.versions.last.versioned_attributes.should eq(expected)
+        expect(book.versions.last.versioned_attributes).to eq(expected)
       end
 
       it 'should set 2 as version number on versioned object' do
-        book.version_number.should eq(2)
+        expect(book.version_number).to eq(2)
       end
 
       it 'should set 1 as version number on version object' do
-        book.versions.last.number.should eq(1)
+        expect(book.versions.last.number).to eq(1)
       end
     end
 
     context 'with an editing time set to 300 seconds' do
       it 'should have Article.versioning_options set properly' do
-        Article.versioning_options[:editing_time].should eq(300)
+        expect(Article.versioning_options[:editing_time]).to eq(300)
       end
 
       context 'without versions' do
@@ -99,11 +99,11 @@ describe Vidibus::Versioning do
           end
 
           it 'should update the versioned object' do
-            article.text.should eq('text 3')
+            expect(article.text).to eq('text 3')
           end
 
           it 'should not create a version object' do
-            article.versions.count.should eq(0)
+            expect(article.versions.count).to eq(0)
           end
         end
       end
@@ -127,11 +127,11 @@ describe Vidibus::Versioning do
             end
 
             it 'should update the versioned object' do
-              article.text.should eq('text 3')
+              expect(article.text).to eq('text 3')
             end
 
             it 'should not create another version object' do
-              article.versions.count.should eq(2)
+              expect(article.versions.count).to eq(2)
             end
           end
 
@@ -143,24 +143,24 @@ describe Vidibus::Versioning do
             end
 
             it 'should update the versioned object' do
-              article.text.should eq('text 3')
+              expect(article.text).to eq('text 3')
             end
 
             it 'should create a new version object' do
-              article.versions.count.should eq(3)
+              expect(article.versions.count).to eq(3)
             end
 
             it 'should store the previous attributes as versioned ones' do
-              article.versions.last.
-                versioned_attributes['title'].should eq('title 2')
+              expect(article.versions.last.
+                versioned_attributes['title']).to eq('title 2')
             end
 
             it 'should set version number 4 on versioned object' do
-              article.version_number.should eq(4)
+              expect(article.version_number).to eq(4)
             end
 
             it 'should set version number 3 on version object' do
-              article.versions.last.number.should eq(3)
+              expect(article.versions.last.number).to eq(3)
             end
           end
 
@@ -174,7 +174,7 @@ describe Vidibus::Versioning do
             end
 
             it 'should create a new version object' do
-              article.versions.count.should eq(3)
+              expect(article.versions.count).to eq(3)
             end
           end
 
@@ -185,7 +185,7 @@ describe Vidibus::Versioning do
             end
 
             it 'should have 3 version objects' do
-              article.versions.count.should eq(3)
+              expect(article.versions.count).to eq(3)
             end
 
             context 'before editing time has passed' do
@@ -196,7 +196,7 @@ describe Vidibus::Versioning do
               end
 
               it 'should create another version object' do
-                article.versions.count.should eq(4)
+                expect(article.versions.count).to eq(4)
               end
             end
           end
@@ -221,12 +221,12 @@ describe Vidibus::Versioning do
 
             it 'should update the versioned object' do
               article.update_attributes(:text => 'text 3')
-              article.reload.text.should eq('text 3')
+              expect(article.reload.text).to eq('text 3')
             end
 
             it 'should create a new version object' do
               article.update_attributes(:text => 'text 3')
-              article.reload.versions.count.should eq(2)
+              expect(article.reload.versions.count).to eq(2)
             end
           end
 
@@ -237,12 +237,12 @@ describe Vidibus::Versioning do
 
             it 'should update the versioned object' do
               article.update_attributes(:text => 'text 3')
-              article.reload.text.should eq('text 3')
+              expect(article.reload.text).to eq('text 3')
             end
 
             it 'should create a new version object' do
               article.update_attributes(:text => 'text 3')
-              article.reload.versions.count.should eq(2)
+              expect(article.reload.versions.count).to eq(2)
             end
           end
         end
@@ -259,22 +259,22 @@ describe Vidibus::Versioning do
       it 'should apply changes to the version' do
         book.version(1).update_attributes(:title => 'new title')
         version = book.reload.version(1)
-        version.title.should eq('new title')
+        expect(version.title).to eq('new title')
       end
 
       it 'should not change the versioned object' do
         book_before = book
         book.version(1).update_attributes(:title => 'new title')
-        book.reload.should eq(book_before)
+        expect(book.reload).to eq(book_before)
       end
 
       it 'should return true like regular saving would' do
-        book.version(1).update_attributes(:title => 'new title').should eq(true)
+        expect(book.version(1).update_attributes(:title => 'new title')).to eq(true)
       end
 
       it 'should perform no update if validation fails' do
-        book.version(1).update_attributes(:title => nil).should eq(false)
-        book.reload.version(1).title.should eq('title 1')
+        expect(book.version(1).update_attributes(:title => nil)).to eq(false)
+        expect(book.reload.version(1).title).to eq('title 1')
       end
     end
 
@@ -282,12 +282,12 @@ describe Vidibus::Versioning do
       it 'should apply changes to the versioned object itself' do
         book.version(1).update_attributes(:title => 'new title')
         version = book.reload.version(1)
-        version.title.should eq('new title')
+        expect(version.title).to eq('new title')
       end
 
       it 'should not create an additional version' do
         book.version(1).update_attributes(:title => 'new title')
-        book.versions.count.should eq(0)
+        expect(book.versions.count).to eq(0)
       end
     end
 
@@ -300,13 +300,13 @@ describe Vidibus::Versioning do
 
       it 'should apply changes to the versioned object itself' do
         book.version(2).update_attributes(:text => 'new text')
-        book.reload.text.should eq('new text')
+        expect(book.reload.text).to eq('new text')
       end
 
       it 'should apply changes to the version object' do
         book.version(2).update_attributes(:text => 'new text')
-        book.reload.versions.last.
-          versioned_attributes['text'].should eq('new text')
+        expect(book.reload.versions.last.
+          versioned_attributes['text']).to eq('new text')
       end
     end
   end
