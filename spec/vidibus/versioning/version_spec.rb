@@ -25,7 +25,7 @@ describe Vidibus::Versioning::Version do
     end
 
     it 'should fail without a number' do
-      stub(subject).number {}
+      allow(subject).to receive(:number) {}
       subject.should be_invalid
     end
 

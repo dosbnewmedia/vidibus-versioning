@@ -49,10 +49,13 @@ describe Vidibus::Versioning::Mongoid do
     end
 
     it 'should set versioned attributes that are nil' do
-      book = Book.create!(:title => 'Moby Dick')
-      book.update_attributes!(:text => 'Call me Ishmael.')
-      book.reload.versions.first.
-        versioned_attributes.to_a.should eq({'title' => 'Moby Dick'}.to_a)
+      book = Book.create!(title: 'Moby Dick')
+      book.update_attributes!(text: 'Call me Ishmael.')
+      versions = book.reload.versions
+      exp = versions.first.versioned_attributes
+
+      expect(exp.to_a).to eq({'title' => 'Moby Dick'}.to_a)
+
       previous = book.version(:previous)
       previous.title.should eq('Moby Dick')
       previous.text.should be_nil
@@ -320,7 +323,7 @@ describe Vidibus::Versioning::Mongoid do
   describe '#migrate!' do
     it 'should call #save!' do
       book_with_two_versions
-      mock(book_with_two_versions).save!
+      allow(book_with_two_versions).to receive(:save!)
       book_with_two_versions.migrate!(1)
     end
 
@@ -354,11 +357,11 @@ describe Vidibus::Versioning::Mongoid do
       end
 
       it 'should raise a MigrationError unless a version has been loaded or given' do
-        expect { book.migrate! }.to raise_error
+        expect { book.migrate! }.to raise_error(Vidibus::Versioning::MigrationError)
       end
 
       it 'should raise a MigrationError if the version number is the current one' do
-        expect { book_with_two_versions.version(2).migrate! }.to raise_error
+        expect { book_with_two_versions.version(2).migrate! }.to raise_error(Vidibus::Versioning::MigrationError)
       end
     end
 
@@ -372,7 +375,7 @@ describe Vidibus::Versioning::Mongoid do
       end
 
       it 'should raise a MigrationError if the version number is the current one' do
-        expect { book.migrate!(1) }.to raise_error
+        expect { book.migrate!(1) }.to raise_error(Vidibus::Versioning::MigrationError)
       end
     end
 
@@ -510,16 +513,16 @@ describe Vidibus::Versioning::Mongoid do
 
   describe '#undo!' do
     it 'should call #version!(:previous) and #migrate!' do
-      mock(book).version!(:previous)
-      mock(book).migrate!
+      allow(book).to receive(:version!).with(:previous)
+      allow(book).to receive(:migrate!)
       book.undo!
     end
   end
 
   describe '#redo!' do
     it 'should call #version!(:next) and #migrate!' do
-      mock(book).version!(:next)
-      mock(book).migrate!
+      allow(book).to receive(:version!).with(:next)
+      allow(book).to receive(:migrate!)
       book.redo!
     end
   end
@@ -568,12 +571,12 @@ describe Vidibus::Versioning::Mongoid do
 
     it 'should apply the version attributes' do
       version = book_with_two_versions.version(1)
-      mock(version).version(1)
+      allow(version).to receive(:version).with(1)
       version.reload_version
     end
 
     it 'should just reload the record if no version was loaded before' do
-      mock(book_with_two_versions).reload { book_with_two_versions }
+      allow(book_with_two_versions).to receive(:reload) { book_with_two_versions }
       book_with_two_versions.reload_version
     end
   end
@@ -781,18 +784,18 @@ describe Vidibus::Versioning::Mongoid do
 
   describe '#save!' do
     it 'should call #save' do
-      mock(book).save { true }
+      allow(book).to receive(:save) { true }
       book.save!
     end
 
     it 'should return nil if saving succeeds' do
-      stub(book).save { true }
-      book.save!.should be_nil
+      allow(book).to receive(:save) { true }
+      expect(book.save!).to be_nil
     end
 
     it 'should raise a validation error if saving fails' do
-      stub(book).save { false }
-      expect { book.save! }.to raise_error
+      allow(book).to receive(:save) { false }
+      expect { book.save! }.to raise_error(Mongoid::Errors::Validations)
     end
   end
 
@@ -800,7 +803,7 @@ describe Vidibus::Versioning::Mongoid do
     context 'without a version loaded' do
       it 'should delete the record' do
         book.delete
-        expect { book.reload }.to raise_error
+        expect { book.reload }.to raise_error(Mongoid::Errors::DocumentNotFound)
       end
 
       it 'should remove all versions of the record' do
@@ -820,7 +823,7 @@ describe Vidibus::Versioning::Mongoid do
       end
 
       it 'should keep the versioned object if deleting fails' do
-        stub.any_instance_of(Vidibus::Versioning::Version).delete { false }
+        allow_any_instance_of(Vidibus::Versioning::Version).to receive(:delete) { false }
         version.delete
         version.reload
       end
@@ -831,7 +834,7 @@ describe Vidibus::Versioning::Mongoid do
     context 'without a version loaded' do
       it 'should destroy the record' do
         book.destroy
-        expect { book.reload }.to raise_error
+        expect { book.reload }.to raise_error(Mongoid::Errors::DocumentNotFound)
       end
 
       it 'should remove all versions of the record' do
@@ -851,7 +854,7 @@ describe Vidibus::Versioning::Mongoid do
       end
 
       it 'should keep the versioned object if deleting fails' do
-        stub.any_instance_of(Vidibus::Versioning::Version).destroy { false }
+        allow_any_instance_of(Vidibus::Versioning::Version).to receive(:destroy) { false }
         version.destroy
         version.reload
       end
@@ -867,13 +870,15 @@ describe Vidibus::Versioning::Mongoid do
     end
 
     context 'with versioned attributes defined' do
+      after do
+        reset_book
+      end
+
       it 'should return the versioned attributes only' do
         Book.versioned_attributes = ['title']
         book = Book.new(book_attributes)
         book.versioned_attributes.should eq({'title' => 'title 1'})
       end
-
-      after {reset_book}
     end
   end
 
@@ -904,8 +909,7 @@ describe Vidibus::Versioning::Mongoid do
       article.update_attributes(:title => 'Something new')
       stub_time('2011-07-14 15:00')
       article.update_attributes(:published => true)
-      article.reload.
-        version_updated_at.should eq(Time.parse('2011-07-14 14:00'))
+      article.reload.version_updated_at.should eq(Time.parse('2011-07-14 14:00'))
     end
   end
 
@@ -948,41 +952,44 @@ describe Vidibus::Versioning::Mongoid do
 
   describe 'callbacks' do
     let(:order) do
-      obj = Order.create(:status => 'Processed')
-      obj.update_attributes!(:status => 'Shipped')
+      obj = Order.create(status: 'Processed')
+      obj.update_attributes!(status: 'Shipped')
       obj.reload
+    end
+
+    before do
+      order
     end
 
     context 'before save' do
       it 'should be triggered before saving a version' do
-        mock(order).callback_before_version_save
-        # order.update_attributes(:status => 'Delivered')
+        allow(order).to receive(:callback_before_version_save)
         order.save
       end
 
       it 'should not persist version when returning false' do
-        stub(order).callback_before_version_save { false }
-        dont_allow(order).persist_version
+        allow(order).to receive(:callback_before_version_save) { throw(:abort) }
+        expect(order).to_not receive(:persist_version)
         order.save
       end
 
       it 'should persist version when returning true' do
-        stub(order).callback_before_version_save { true }
-        mock(order).persist_version
+        allow(order).to receive(:callback_before_version_save) { true }
+        allow(order).to receive(:persist_version)
         order.save
       end
     end
 
     context 'after save' do
       it 'should be triggered after successfully saving a version' do
-        mock(order).callback_after_version_save
+        allow(order).to receive(:callback_before_version_save)
         order.save
       end
 
       it 'should not be triggered if saving fails' do
-        pending('Callback is still being called!')
-        dont_allow(order).callback_after_version_save
-        stub(order).persist_version { false }
+        skip('Callback is still being called!')
+        expect(order).to_not receive(:callback_after_version_save)
+        allow(order).to receive(:persist_version) { false }
         order.save
       end
     end

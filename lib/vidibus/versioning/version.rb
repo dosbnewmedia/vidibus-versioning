@@ -5,11 +5,11 @@ module Vidibus
       include ::Mongoid::Timestamps
       include Vidibus::Uuid::Mongoid
 
-      belongs_to :versioned, polymorphic: true
+      belongs_to :versioned, polymorphic: true, autosave: false
 
       field :versioned_uuid, type: String
       field :versioned_attributes, type: Hash, default: {}
-      field :number, type: Integer
+      field :number, type: Integer, default: nil
 
       index({versioned_uuid: 1, number: 1})
 

@@ -24,18 +24,18 @@ describe Vidibus::Versioning do
 
   describe 'updating a versioned object' do
     it 'should create a new version if attributes were changed' do
-      mock.any_instance_of(Vidibus::Versioning::Version).save { true }
-      stub.any_instance_of(Vidibus::Versioning::Version).number { 1 }
+      allow_any_instance_of(Vidibus::Versioning::Version).to receive(:save) { true }
+      allow_any_instance_of(Vidibus::Versioning::Version).to receive(:number) { 1 }
       book.update_attributes(:title => 'something')
     end
 
     it 'should not create a version if update fails' do
-      dont_allow.any_instance_of(Vidibus::Versioning::Version).save { true }
+      expect_any_instance_of(Vidibus::Versioning::Version).to_not receive(:save) { true }
       book.update_attributes(:title => nil)
     end
 
     it 'should not create a version unless any of the versioned attributes were changed' do
-      dont_allow.any_instance_of(Vidibus::Versioning::Version).save { true }
+      expect_any_instance_of(Vidibus::Versioning::Version).to_not receive(:save) { true }
       book.update_attributes(:title => 'title 1')
     end
 
@@ -43,18 +43,18 @@ describe Vidibus::Versioning do
       past = stub_time('2011-01-01 01:00')
       book
       stub_time('2011-01-01 02:00')
-      book.update_attributes(:title => 'title 2')
-      book.reload.versions.count.should eq(1)
-      book.versions.first.created_at.should eq(past)
+      book.update_attributes(title: 'title 2')
+      expect(book.versions.count).to eq(1)
+      expect(book.versions.first.created_at).to eq(past)
     end
 
     it 'should apply a given update time as creation time of version' do
       future = Time.parse('2012-01-01 00:00 UTC')
       version = book.version(:next)
-      version.update_attributes(:title => 'THE FUTURE!', :updated_at => future)
+      version.update_attributes(title: 'THE FUTURE!', updated_at: future)
       book.reload
-      book.versions.count.should eq(1)
-      book.versions.first.created_at.should eq(future)
+      expect(book.versions.count).to eq(1)
+      expect(book.versions.first.created_at).to eq(future)
     end
 
     context 'with only one version' do

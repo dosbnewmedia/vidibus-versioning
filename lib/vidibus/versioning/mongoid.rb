@@ -9,8 +9,8 @@ module Vidibus
 
         has_many :versions, :as => :versioned, :class_name => 'Vidibus::Versioning::Version', :dependent => :destroy
 
-        field :version_number, :type => Integer, :default => 1
-        field :version_updated_at, :type => Time
+        field :version_number, type: Integer, default: 1
+        field :version_updated_at, type: Time
 
         after_initialize :original_attributes
         after_initialize :set_version_updated_at, :unless => :version_updated_at
@@ -54,11 +54,11 @@ module Vidibus
       #   48         returns version 48 of self
       #
       def version(*args)
-        ::Mongoid.unit_of_work(disable: :current) do
+        # ::Mongoid.unit_of_work(disable: :current) do
           self.class.find(_id).tap do |copy|
             copy.apply_version!(*args)
           end
-        end
+          #end
       end
 
       # Applies versioned attributes on this object. Returns nil.
@@ -160,8 +160,8 @@ module Vidibus
         end
       end
 
-      def delete
-        super if remove_version(:delete) == nil
+      def delete(options = {})
+        super(options) if remove_version(:delete) == nil
       end
 
       def destroy
@@ -387,9 +387,7 @@ module Vidibus
             end
           end
         elsif version_obj
-          version_obj.update_attributes!({
-            :versioned_attributes => original_attributes
-          })
+          version_obj.update_attributes!({versioned_attributes: original_attributes})
           self.version_number = version_obj.number + 1
           self.version_updated_at = Time.now
         end

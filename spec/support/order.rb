@@ -2,7 +2,7 @@ class Order
   include Mongoid::Document
   include Vidibus::Versioning::Mongoid
 
-  field :status, :type => String
+  field :status, type: String
 
   versioned :status
 

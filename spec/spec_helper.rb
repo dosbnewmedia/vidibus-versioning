@@ -5,25 +5,24 @@ end
 
 $:.unshift File.expand_path('../../', __FILE__)
 
-require 'rubygems'
 require 'rspec'
-require 'rr'
+require 'timecop'
 require 'vidibus-versioning'
 require 'database_cleaner'
 
 Dir['spec/support/**/*.rb'].each { |f| require f }
 
+Mongo::Logger.logger.level = Logger::FATAL
+
 Mongoid.configure do |config|
   config.connect_to('vidibus-versioning_test')
-  config.identity_map_enabled = true
 end
 
 RSpec.configure do |config|
-  config.mock_with :rr
-  # config.before(:each) do
-  #   Mongoid::Sessions.default.collections.
-  #     select {|c| c.name !~ /system/}.each(&:drop)
-  # end
+  config.before(:each) do
+    Mongoid::Clients.default.collections.
+      select {|c| c.name !~ /system/}.each(&:drop)
+  end
   config.before(:suite) do
     DatabaseCleaner.clean_with(:truncation)
   end
@@ -33,6 +32,7 @@ RSpec.configure do |config|
   end
 
   config.after(:each) do
+    Timecop.return
     DatabaseCleaner.clean
   end
 end
