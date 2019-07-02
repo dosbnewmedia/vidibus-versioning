@@ -7,13 +7,14 @@ module Vidibus
         include ::Mongoid::Timestamps
         include Vidibus::Uuid::Mongoid
 
-        has_many :versions, :as => :versioned, :class_name => 'Vidibus::Versioning::Version', :dependent => :destroy
+        has_many :versions, as: :versioned, class_name: 'Vidibus::Versioning::Version', dependent: :destroy
 
         field :version_number, type: Integer, default: 1
         field :version_updated_at, type: Time
 
         after_initialize :original_attributes
-        after_initialize :set_version_updated_at, :unless => :version_updated_at
+        after_initialize :set_version_updated_at, unless: :version_updated_at
+
         before_save :reset_version_cache
 
         mattr_accessor :versioned_attributes, :unversioned_attributes, :versioning_options
@@ -40,7 +41,7 @@ module Vidibus
         #
         def versioned(*args)
           options = args.extract_options!
-          self.versioned_attributes = args.map {|a| a.to_s} if args.any?
+          self.versioned_attributes = args.map(&:to_s) if args.any?
           self.versioning_options = options if options.any?
         end
       end
@@ -386,7 +387,7 @@ module Vidibus
               return true
             end
           end
-        elsif version_obj
+        elsif !version_obj.nil?
           version_obj.update_attributes!({versioned_attributes: original_attributes})
           self.version_number = version_obj.number + 1
           self.version_updated_at = Time.now
