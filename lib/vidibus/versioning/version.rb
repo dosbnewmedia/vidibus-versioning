@@ -19,8 +19,11 @@ module Vidibus
       }
 
       before_validation :set_number, :set_versioned_uuid
+      after_save :persist_versioned, unless: :skip_persist_versioned
 
       scope :timeline, -> { desc(:created_at) }
+
+      attr_accessor :skip_persist_versioned
 
       def past?
         !!(created_at && created_at < Time.now)
@@ -31,6 +34,10 @@ module Vidibus
       end
 
       protected
+
+      def persist_versioned
+        versioned.save
+      end
 
       def set_number
         return if number

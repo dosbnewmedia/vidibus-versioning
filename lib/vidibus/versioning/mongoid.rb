@@ -372,12 +372,13 @@ module Vidibus
         end
 
         if version_cache.original_version_obj
-          version_cache.original_version_obj.save!
+          version_cache.original_version_obj.update_attributes!(skip_persist_versioned: true)
         elsif version_cache.wanted_version_number
           if version_obj
             saved = version_obj.update_attributes({
-              :versioned_attributes => versioned_attributes,
-              :created_at => updated_at
+              versioned_attributes: versioned_attributes,
+              created_at: updated_at,
+              skip_persist_versioned: true
             })
           end
           unless version_cache.self_version
@@ -388,7 +389,7 @@ module Vidibus
             end
           end
         elsif !version_obj.nil?
-          version_obj.update_attributes!({versioned_attributes: original_attributes})
+          version_obj.update_attributes!({versioned_attributes: original_attributes, skip_persist_versioned: true})
           self.version_number = version_obj.number + 1
           self.version_updated_at = Time.now
         end
